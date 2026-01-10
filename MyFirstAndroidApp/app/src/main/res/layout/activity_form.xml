@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="match_parent"
+            android:layout_height="67dp"
+            android:background="#169E8E"
+            android:gravity="center"
+            android:text="Registration Form"
+            android:textSize="20sp" />
+
+        <EditText
+            android:id="@+id/rName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="enter your name"
+            android:inputType="text" />
+
+        <EditText
+            android:id="@+id/rEmail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="enter your email"
+            android:inputType="text" />
+
+        <EditText
+            android:id="@+id/rPass"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="enter your password"
+            android:inputType="text" />
+
+        <EditText
+            android:id="@+id/rPhone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="phone"
+            android:inputType="text" />
+
+        <TextView
+            android:id="@+id/rrrr"
+            android:layout_width="match_parent"
+            android:layout_height="47dp"
+            android:text="Gender"
+            android:textIsSelectable="true"
+            android:textSize="20sp" />
+
+        <RadioGroup
+            android:id="@+id/rGender"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="12dp"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/rMale"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="male" />
+
+            <RadioButton
+                android:id="@+id/rFemale"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="female" />
+
+            <RadioButton
+                android:id="@+id/rOther"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="others" />
+        </RadioGroup>
+
+        <TextView
+            android:id="@+id/textView4"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="20sp"
+            android:text="Date of Birth" />
+
+        <DatePicker
+            android:id="@+id/rDate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:calendarViewShown="false" />
+
+        <TextView
+            android:id="@+id/textView5"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Country" />
+
+        <Spinner
+            android:id="@+id/rCountry"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp" />
+
+        <TextView
+            android:id="@+id/textView6"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Skills" />
+
+        <CheckBox
+            android:id="@+id/rJava"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Java" />
+
+        <CheckBox
+            android:id="@+id/rAndroid"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Android" />
+
+        <CheckBox
+            android:id="@+id/rFlutter"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Flutter" />
+
+        <CheckBox
+            android:id="@+id/rAngular"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="30dp"
+            android:text="Angular" />
+
+        <CheckBox
+            android:id="@+id/rTerm"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Are you agree for above the information?" />
+        <Button
+            android:id="@+id/rButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            android:text="Submit" />
+
+        <TextView
+            android:id="@+id/rLogin"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="18sp"
+            android:layout_marginBottom="40dp"
+            android:text="Already have an account!! Login." />
+
+
+
+
+    </LinearLayout>
+</ScrollView>
