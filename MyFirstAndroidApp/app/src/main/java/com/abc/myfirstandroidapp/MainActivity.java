@@ -10,6 +10,9 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.abc.myfirstandroidapp.layout.LoginActivity;
+import com.abc.myfirstandroidapp.layout.UserListActivity;
+
 public class MainActivity extends AppCompatActivity {
 
     @Override
@@ -23,10 +26,17 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
-        Button hLogin = findViewById(R.id.hLogin);
+        Button hLogin = findViewById(R.id.mLogin);
+        Button mList = findViewById(R.id.mList);
          hLogin.setOnClickListener(v ->{
              Intent intent = new Intent(this, LoginActivity.class);
              startActivity(intent);
          });
+
+
+        mList.setOnClickListener(v ->{
+            Intent intent = new Intent(this, UserListActivity.class);
+            startActivity(intent);
+        });
     }
 }
