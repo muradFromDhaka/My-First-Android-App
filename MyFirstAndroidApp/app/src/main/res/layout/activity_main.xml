@@ -23,26 +23,40 @@
 
     <Button
         android:id="@+id/mLogin"
-        android:layout_width="237dp"
-        android:layout_height="98dp"
+        android:layout_width="166dp"
+        android:layout_height="82dp"
         android:text="Go To Login"
         android:textSize="25sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.497"
+        app:layout_constraintHorizontal_bias="0.065"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/imageView"
-        app:layout_constraintVertical_bias="0.197" />
+        app:layout_constraintVertical_bias="0.212" />
 
     <Button
         android:id="@+id/mList"
-        android:layout_width="175dp"
-        android:layout_height="100dp"
+        android:layout_width="166dp"
+        android:layout_height="89dp"
         android:text="User List"
         android:textSize="30sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.934"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/imageView"
-        app:layout_constraintVertical_bias="0.793" />
+        app:layout_constraintVertical_bias="0.603" />
+
+    <Button
+        android:id="@+id/mAddress"
+        android:layout_width="230dp"
+        android:layout_height="89dp"
+        android:text="Address form"
+        android:textSize="30sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.497"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/imageView"
+        app:layout_constraintVertical_bias="0.771" />
 </androidx.constraintlayout.widget.ConstraintLayout>

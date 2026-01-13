@@ -37,6 +37,7 @@ public class UserListActivity extends AppCompatActivity {
 
         loadUsers();
     }
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -49,7 +50,7 @@ public class UserListActivity extends AppCompatActivity {
             String[] options = {"Update", "Delete"};
             new android.app.AlertDialog.Builder(UserListActivity.this)
                     .setTitle("Select Action")
-                    .setItems(options, (dialog, which) -> {
+                    .setItems(options, (dialog,which) -> {
                         if (which == 0) {
                             // Update - just startActivity normally
                             Intent intent = new Intent(UserListActivity.this, FormActivity.class);

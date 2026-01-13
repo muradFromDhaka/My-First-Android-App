@@ -9,9 +9,10 @@ import androidx.annotation.Nullable;
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     public static  final  String db_name = "app_db";
-    public static  final  int db_version = 1;
+    public static  final  int db_version = 2;
     public static  final  String TABLE_USER = "users";
 
+    public static final String TABLE_ADDRESS ="address";
     public DatabaseHelper(Context context) {
         super(context, db_name, null, db_version);
     }
@@ -33,11 +34,21 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                          ")";
 
         db.execSQL(TABLE_NAME_USER);
+
+        String CREATE_TABLE_ADDRESS =
+                "create table " + TABLE_ADDRESS + "(" +
+                        "id INTEGER PRIMARY KEY AUTOINCREMENT,"+
+                        "name TEXT," +
+                        "city TEXT," +
+                        "po TEXT" + ")";
+
+        db.execSQL(CREATE_TABLE_ADDRESS);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_USER);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_ADDRESS);
         onCreate(db);
     }
 }
