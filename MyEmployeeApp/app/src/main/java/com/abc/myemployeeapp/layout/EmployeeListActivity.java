@@ -18,6 +18,7 @@ import com.abc.myemployeeapp.adapter.EmployeeAdapter;
 import com.abc.myemployeeapp.db.EmployeeDao;
 import com.abc.myemployeeapp.entity.Employee;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class EmployeeListActivity extends AppCompatActivity {
@@ -25,6 +26,8 @@ public class EmployeeListActivity extends AppCompatActivity {
     RecyclerView recyclerView;
     EmployeeAdapter adapter;
     EmployeeDao employeeDao;
+
+    List<Employee> employeeList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,48 +46,60 @@ public class EmployeeListActivity extends AppCompatActivity {
 
         employeeDao = new EmployeeDao(this);
 
+        // 🔹 Init adapter ONCE
+        adapter = new EmployeeAdapter(this, employeeList, this::showActionDialog);
+        recyclerView.setAdapter(adapter);
+
         loadEmployees();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        loadEmployees(); // form থেকে ফিরে এলে refresh
+        loadEmployees(); // refresh when coming back
     }
 
+    // 🔹 Reload data only
     private void loadEmployees() {
-        List<Employee> employeeList = employeeDao.getAllEmployees();
+        employeeList.clear();
+        employeeList.addAll(employeeDao.getAllEmployees());
+        adapter.notifyDataSetChanged();
+    }
 
-        adapter = new EmployeeAdapter(this, employeeList, employee -> {
-            String[] options = {"Update", "Delete"};
+    // 🔹 Update / Delete dialog
+    private void showActionDialog(Employee employee) {
 
-            new AlertDialog.Builder(this)
-                    .setTitle("Select Action")
-                    .setItems(options, (dialog, which) -> {
+        String[] options = {"Update", "Delete"};
 
-                        if (which == 0) {
-                            // ✏️ Update
-                            Intent intent = new Intent(this, EmployeeFormActivity.class);
-                            intent.putExtra("id", employee.getId());
-                            startActivity(intent);
+        new AlertDialog.Builder(this)
+                .setTitle("Select Action")
+                .setItems(options, (dialog, which) -> {
 
-                        } else if (which == 1) {
-                            // 🗑 Delete
-                            new AlertDialog.Builder(this)
-                                    .setTitle("Delete Employee")
-                                    .setMessage("Are you sure you want to delete?")
-                                    .setPositiveButton("Yes", (d, w) -> {
-                                        employeeDao.deleteEmployee(employee.getId());
-                                        Toast.makeText(this, "Employee Deleted", Toast.LENGTH_SHORT).show();
-                                        loadEmployees();
-                                    })
-                                    .setNegativeButton("No", null)
-                                    .show();
-                        }
-                    })
-                    .show();
-        });
+                    if (which == 0) {
+                        // ✏️ Update
+                        Intent intent =
+                                new Intent(this, EmployeeFormActivity.class);
+                        intent.putExtra("id", employee.getId());
+                        startActivity(intent);
 
-        recyclerView.setAdapter(adapter);
+                    } else {
+                        // 🗑 Delete
+                        new AlertDialog.Builder(this)
+                                .setTitle("Delete Employee")
+                                .setMessage("Are you sure you want to delete?")
+                                .setPositiveButton("Yes", (d, w) -> {
+                                    employeeDao.deleteEmployee(employee.getId());
+                                    Toast.makeText(
+                                            this,
+                                            "Employee Deleted",
+                                            Toast.LENGTH_SHORT
+                                    ).show();
+                                    loadEmployees();
+                                })
+                                .setNegativeButton("No", null)
+                                .show();
+                    }
+                })
+                .show();
     }
 }

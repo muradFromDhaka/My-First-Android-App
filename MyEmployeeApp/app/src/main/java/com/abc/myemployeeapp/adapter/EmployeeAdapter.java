@@ -1,9 +1,11 @@
 package com.abc.myemployeeapp.adapter;
 
 import android.content.Context;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -11,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.abc.myemployeeapp.R;
 import com.abc.myemployeeapp.entity.Employee;
+import com.bumptech.glide.Glide;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -19,7 +22,6 @@ import java.util.Locale;
 
 public class EmployeeAdapter extends RecyclerView.Adapter<EmployeeAdapter.EmployeeViewHolder> {
 
-    // 🔹 Long click interface
     public interface OnEmployeeClick {
         void onLongClick(Employee employee);
     }
@@ -28,7 +30,6 @@ public class EmployeeAdapter extends RecyclerView.Adapter<EmployeeAdapter.Employ
     private List<Employee> employeeList;
     private OnEmployeeClick listener;
 
-    // 🔹 Constructor
     public EmployeeAdapter(Context context, List<Employee> employeeList, OnEmployeeClick listener) {
         this.context = context;
         this.employeeList = employeeList;
@@ -48,23 +49,29 @@ public class EmployeeAdapter extends RecyclerView.Adapter<EmployeeAdapter.Employ
         Employee e = employeeList.get(position);
 
         holder.tvName.setText(e.getName());
-        holder.tvEmail.setText("email: " +e.getEmail());
-        holder.tvDepartment.setText("Department: " +e.getDepartment());
+        holder.tvEmail.setText("Email: " + e.getEmail());
+        holder.tvDepartment.setText("Department: " + e.getDepartment());
         holder.tvSalary.setText("Salary: " + e.getSalary());
 
-        long joiningDate = e.getJoiningDate();
         SimpleDateFormat sdf =
                 new SimpleDateFormat("dd MMM yyyy", Locale.getDefault());
+        holder.tvJoiningDate.setText(
+                "Joining Date: " + sdf.format(new Date(e.getJoiningDate()))
+        );
 
-        String formattedDate = sdf.format(new Date(joiningDate));
-
-        holder.tvJoiningDate.setText("Joining Date: " + formattedDate);
-
+        // 🔹 Load image safely
+        if (e.getImagePath() != null && !e.getImagePath().isEmpty()) {
+            Glide.with(context)
+                    .load(Uri.parse(e.getImagePath()))
+                    .placeholder(R.drawable.image_24)
+                    .error(R.drawable.image_24)
+                    .into(holder.ivProfile);
+        } else {
+            holder.ivProfile.setImageResource(R.drawable.image_24);
+        }
 
         holder.itemView.setOnLongClickListener(v -> {
-            if (listener != null) {
-                listener.onLongClick(e);
-            }
+            if (listener != null) listener.onLongClick(e);
             return true;
         });
     }
@@ -74,13 +81,14 @@ public class EmployeeAdapter extends RecyclerView.Adapter<EmployeeAdapter.Employ
         return employeeList == null ? 0 : employeeList.size();
     }
 
-    // 🔹 ViewHolder
     static class EmployeeViewHolder extends RecyclerView.ViewHolder {
 
+        ImageView ivProfile;
         TextView tvName, tvEmail, tvDepartment, tvSalary, tvJoiningDate;
 
         public EmployeeViewHolder(@NonNull View itemView) {
             super(itemView);
+            ivProfile = itemView.findViewById(R.id.tvImage);
             tvName = itemView.findViewById(R.id.tvName);
             tvEmail = itemView.findViewById(R.id.tvEmail);
             tvDepartment = itemView.findViewById(R.id.tvDepartment);

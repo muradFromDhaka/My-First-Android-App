@@ -1,9 +1,9 @@
 package com.abc.myemployeeapp.db;
+
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-
 
 import com.abc.myemployeeapp.entity.Employee;
 
@@ -18,7 +18,7 @@ public class EmployeeDao {
         dbHelper = new DatabaseHelper(context);
     }
 
-    // 🔹 Insert Employee
+    // 🔹 Insert
     public long insertEmployee(Employee e) {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
 
@@ -32,15 +32,20 @@ public class EmployeeDao {
         cv.put("joiningDate", e.getJoiningDate());
         cv.put("department", e.getDepartment());
         cv.put("skills", e.getSkills());
-        return db.insert("employees", null, cv);
+        cv.put("imagePath", e.getImagePath());
+
+        return db.insert(DatabaseHelper.TABLE_EMPLOYEES, null, cv);
     }
 
-    // 🔹 Get All Employees
+    // 🔹 Get All
     public List<Employee> getAllEmployees() {
         List<Employee> list = new ArrayList<>();
         SQLiteDatabase db = dbHelper.getReadableDatabase();
 
-        Cursor c = db.rawQuery("SELECT * FROM employees ORDER BY id DESC", null);
+        Cursor c = db.rawQuery(
+                "SELECT * FROM " + DatabaseHelper.TABLE_EMPLOYEES + " ORDER BY id DESC",
+                null
+        );
 
         if (c.moveToFirst()) {
             do {
@@ -52,11 +57,12 @@ public class EmployeeDao {
         return list;
     }
 
-    // 🔹 Get Employee by ID
+    // 🔹 Get by ID
     public Employee getEmployeeById(long id) {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
+
         Cursor c = db.rawQuery(
-                "SELECT * FROM employees WHERE id=?",
+                "SELECT * FROM " + DatabaseHelper.TABLE_EMPLOYEES + " WHERE id=?",
                 new String[]{String.valueOf(id)}
         );
 
@@ -70,7 +76,7 @@ public class EmployeeDao {
         return null;
     }
 
-    // 🔹 Update Employee
+    // 🔹 Update
     public int updateEmployee(Employee e) {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
 
@@ -84,25 +90,27 @@ public class EmployeeDao {
         cv.put("joiningDate", e.getJoiningDate());
         cv.put("department", e.getDepartment());
         cv.put("skills", e.getSkills());
+        cv.put("imagePath", e.getImagePath());
+
         return db.update(
-                "employees",
+                DatabaseHelper.TABLE_EMPLOYEES,
                 cv,
                 "id=?",
                 new String[]{String.valueOf(e.getId())}
         );
     }
 
-    // 🔹 Delete Employee
+    // 🔹 Delete
     public int deleteEmployee(long id) {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         return db.delete(
-                "employees",
+                DatabaseHelper.TABLE_EMPLOYEES,
                 "id=?",
                 new String[]{String.valueOf(id)}
         );
     }
 
-    // 🔹 Cursor → Employee converter
+    // 🔹 Cursor → Employee
     private Employee cursorToEmployee(Cursor c) {
         Employee e = new Employee();
         e.setId(c.getLong(c.getColumnIndexOrThrow("id")));
@@ -115,6 +123,7 @@ public class EmployeeDao {
         e.setJoiningDate(c.getLong(c.getColumnIndexOrThrow("joiningDate")));
         e.setDepartment(c.getString(c.getColumnIndexOrThrow("department")));
         e.setSkills(c.getString(c.getColumnIndexOrThrow("skills")));
+        e.setImagePath(c.getString(c.getColumnIndexOrThrow("imagePath")));
         return e;
     }
 }

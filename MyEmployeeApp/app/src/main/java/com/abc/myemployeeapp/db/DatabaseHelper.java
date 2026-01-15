@@ -8,18 +8,15 @@ import androidx.annotation.Nullable;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
-    // 🔹 Database info
     private static final String DATABASE_NAME = "employee_db";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2; // ⬅️ version bump
 
-    // 🔹 Table name
     public static final String TABLE_EMPLOYEES = "employees";
 
     public DatabaseHelper(@Nullable Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
-    // 🔹 Create tables
     @Override
     public void onCreate(SQLiteDatabase db) {
 
@@ -34,17 +31,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                         "active TEXT, " +
                         "joiningDate INTEGER, " +
                         "department TEXT, " +
-                        "skills TEXT " +
+                        "skills TEXT, " +
+                        "imagePath TEXT" +
                         ")";
 
         db.execSQL(CREATE_EMPLOYEE_TABLE);
     }
 
-    // 🔹 Handle database upgrade
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-
-        // Simple strategy: drop & recreate
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_EMPLOYEES);
         onCreate(db);
     }

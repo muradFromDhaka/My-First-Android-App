@@ -1,40 +1,53 @@
 package com.abc.myemployeeapp.layout;
 
+import android.Manifest;
+import android.app.AlertDialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
+import androidx.core.content.ContextCompat;
 
 import com.abc.myemployeeapp.R;
 import com.abc.myemployeeapp.db.EmployeeDao;
 import com.abc.myemployeeapp.entity.Employee;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 public class EmployeeFormActivity extends AppCompatActivity {
 
     EditText etName, etEmail, etPhone, etAge, etSalary;
     CheckBox etJava, etFlutter, etAndroid, etAngular;
-
     Spinner etDepartment, etActivity;
-    Button btnSave;
+    Button btnSave, btnUploadImage;
+    ImageView ivProfile;
 
     EmployeeDao employeeDao;
-    long employeeId = -1; // add / update বোঝার জন্য
+    long employeeId = -1;
+
+    String selectedImagePath = null;
+
+    ActivityResultLauncher<Intent> cameraLauncher;
+    ActivityResultLauncher<Intent> galleryLauncher;
+    ActivityResultLauncher<String> cameraPermissionLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,108 +55,71 @@ public class EmployeeFormActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_employee_form);
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
-
-        // 🔹 View binding
-        etName = findViewById(R.id.etName);
-        etEmail = findViewById(R.id.etEmail);
-        etPhone = findViewById(R.id.etPhone);
-        etAge = findViewById(R.id.etAge);
-        etSalary = findViewById(R.id.etSalary);
-        etActivity = findViewById(R.id.etActivity);
-        etDepartment = findViewById(R.id.etDepartment);
-        etJava = findViewById(R.id.etJava);
-        etFlutter = findViewById(R.id.etFlutter);
-        etAndroid = findViewById(R.id.etAndroid);
-        etAngular = findViewById(R.id.etAngular);
-        btnSave = findViewById(R.id.btnSave);
-
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(
-                this,
-                android.R.layout.simple_spinner_dropdown_item,
-                Arrays.asList("HR", "Finance", "Marketing", "IT", "Research & Development"));
-        etDepartment.setAdapter(adapter);
-
-        ArrayAdapter<String> adapter2 = new ArrayAdapter<>(
-                this,
-                android.R.layout.simple_spinner_dropdown_item,
-                Arrays.asList("Active", "Inactive"));
-        etActivity.setAdapter(adapter2);
+        initViews();
+        initSpinners();
+        initLaunchers();
 
         employeeDao = new EmployeeDao(this);
 
-
-        btnSave.setOnClickListener(v -> {
-            String name = etName.getText().toString();
-            String email = etEmail.getText().toString();
-            String phone = etPhone.getText().toString();
-            String active = etActivity.getSelectedItem().toString();
-            String department = etDepartment.getSelectedItem().toString();
-//          String jDate = etJoiningDate.getDayOfMonth()+ "/" + (etJoiningDate.getMonth() + 1) + "/" + etJoiningDate.getYear();
-            long joiningDate = System.currentTimeMillis();
-            int age = etAge.getText().toString().isEmpty() ? 0 :
-                    Integer.parseInt(etAge.getText().toString());
-
-            double salary = etSalary.getText().toString().isEmpty() ? 0 :
-                    Double.parseDouble(etSalary.getText().toString());
+        // 🔹 Add this: check storage/gallery permission
+        checkStoragePermission();
 
 
-            List<String> skills = new ArrayList<>();
-            if (etJava.isChecked()) skills.add("Java");
-            if (etAngular.isChecked()) skills.add("Angular");
-            if (etFlutter.isChecked()) skills.add("Flutter");
-            if (etAndroid.isChecked()) skills.add("Android");
-
-            String stringSkills = skills.isEmpty() ? " " : String.join(",", skills);
-
-            Employee emp = new Employee(
-                    name,
-                    email,
-                    phone,
-                    age,
-                    salary,
-                    active,
-                    joiningDate,
-                    department,
-                    stringSkills
-            );
-
-            long id = employeeDao.insertEmployee(emp);
-            Toast.makeText(this, "Saved employee ID:" + id, Toast.LENGTH_SHORT).show();
-            Intent intent = new Intent(this, EmployeeListActivity.class);
-            startActivity(intent);
-        });
 
         // 🔹 Update mode check
-        if (getIntent().hasExtra("id")) {
+        if (getIntent() != null && getIntent().hasExtra("id")) {
             employeeId = getIntent().getLongExtra("id", -1);
             loadEmployee(employeeId);
             btnSave.setText("Update Employee");
         }
 
-        // 🔹 Save / Update button
+        btnUploadImage.setOnClickListener(v -> showImageChooser());
         btnSave.setOnClickListener(v -> saveEmployee());
-
     }
 
+    // ================= INIT =================
+    private void initViews() {
+        etName = findViewById(R.id.etName);
+        etEmail = findViewById(R.id.etEmail);
+        etPhone = findViewById(R.id.etPhone);
+        etAge = findViewById(R.id.etAge);
+        etSalary = findViewById(R.id.etSalary);
 
+        etJava = findViewById(R.id.etJava);
+        etFlutter = findViewById(R.id.etFlutter);
+        etAndroid = findViewById(R.id.etAndroid);
+        etAngular = findViewById(R.id.etAngular);
 
-    // ================= SAVE OR UPDATE =================
+        etDepartment = findViewById(R.id.etDepartment);
+        etActivity = findViewById(R.id.etActivity);
+
+        btnSave = findViewById(R.id.btnSave);
+        btnUploadImage = findViewById(R.id.btnUploadImage);
+        ivProfile = findViewById(R.id.ivProfile);
+    }
+
+    private void initSpinners() {
+        etDepartment.setAdapter(new ArrayAdapter<>(
+                this,
+                android.R.layout.simple_spinner_dropdown_item,
+                Arrays.asList("HR", "Finance", "Marketing", "IT", "R&D")
+        ));
+
+        etActivity.setAdapter(new ArrayAdapter<>(
+                this,
+                android.R.layout.simple_spinner_dropdown_item,
+                Arrays.asList("Active", "Inactive")
+        ));
+    }
+
+    // ================= SAVE / UPDATE =================
     private void saveEmployee() {
 
         String name = etName.getText().toString().trim();
         String email = etEmail.getText().toString().trim();
-        String phone = etPhone.getText().toString().trim();
-        String department = etDepartment.getSelectedItem().toString();
-        String active = etActivity.getSelectedItem().toString();
 
         if (name.isEmpty() || email.isEmpty()) {
-            Toast.makeText(this, "Name and Email are required", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Name & Email required", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -153,33 +129,31 @@ public class EmployeeFormActivity extends AppCompatActivity {
         double salary = etSalary.getText().toString().isEmpty() ? 0 :
                 Double.parseDouble(etSalary.getText().toString());
 
-        // 🔹 Skills
         List<String> skills = new ArrayList<>();
         if (etJava.isChecked()) skills.add("Java");
         if (etAngular.isChecked()) skills.add("Angular");
         if (etFlutter.isChecked()) skills.add("Flutter");
         if (etAndroid.isChecked()) skills.add("Android");
+
         String skillString = skills.isEmpty() ? "" : String.join(",", skills);
 
-        // 🔹 Joining date logic
-        long joiningDate;
-        if (employeeId == -1) {
-            joiningDate = System.currentTimeMillis(); // add
-        } else {
-            joiningDate = employeeDao.getEmployeeById(employeeId).getJoiningDate(); // keep old
-        }
+        long joiningDate = employeeId == -1
+                ? System.currentTimeMillis()
+                : employeeDao.getEmployeeById(employeeId).getJoiningDate();
 
         Employee emp = new Employee(
                 name,
                 email,
-                phone,
+                etPhone.getText().toString(),
                 age,
                 salary,
-                active,
+                etActivity.getSelectedItem().toString(),
                 joiningDate,
-                department,
+                etDepartment.getSelectedItem().toString(),
                 skillString
         );
+
+        emp.setImagePath(selectedImagePath);
 
         if (employeeId == -1) {
             employeeDao.insertEmployee(emp);
@@ -194,7 +168,7 @@ public class EmployeeFormActivity extends AppCompatActivity {
         finish();
     }
 
-    // ================= LOAD EMPLOYEE FOR UPDATE =================
+    // ================= LOAD EMPLOYEE =================
     private void loadEmployee(long id) {
         Employee e = employeeDao.getEmployeeById(id);
         if (e == null) return;
@@ -205,23 +179,123 @@ public class EmployeeFormActivity extends AppCompatActivity {
         etAge.setText(String.valueOf(e.getAge()));
         etSalary.setText(String.valueOf(e.getSalary()));
 
-        setSpinnerSelection(etDepartment, e.getDepartment());
-        setSpinnerSelection(etActivity, e.getActive());
+        setSpinner(etDepartment, e.getDepartment());
+        setSpinner(etActivity, e.getActive());
 
         if (e.getSkills() != null) {
-            if (e.getSkills().contains("Java")) etJava.setChecked(true);
-            if (e.getSkills().contains("Angular")) etAngular.setChecked(true);
-            if (e.getSkills().contains("Flutter")) etFlutter.setChecked(true);
-            if (e.getSkills().contains("Android")) etAndroid.setChecked(true);
+            etJava.setChecked(e.getSkills().contains("Java"));
+            etAngular.setChecked(e.getSkills().contains("Angular"));
+            etFlutter.setChecked(e.getSkills().contains("Flutter"));
+            etAndroid.setChecked(e.getSkills().contains("Android"));
+        }
+
+        selectedImagePath = e.getImagePath();
+        if (selectedImagePath != null) {
+            ivProfile.setImageURI(Uri.parse(selectedImagePath));
         }
     }
 
-    // ================= SPINNER HELPER =================
-    private void setSpinnerSelection(Spinner spinner, String value) {
+    private void setSpinner(Spinner spinner, String value) {
         ArrayAdapter adapter = (ArrayAdapter) spinner.getAdapter();
-        int position = adapter.getPosition(value);
-        spinner.setSelection(position);
+        spinner.setSelection(adapter.getPosition(value));
     }
+
+    // ================= IMAGE =================
+    private void showImageChooser() {
+        String[] options = {"Camera", "Gallery", "Remove"};
+        new AlertDialog.Builder(this)
+                .setItems(options, (d, w) -> {
+                    if (w == 0) requestCamera();
+                    else if (w == 1) openGallery();
+                    else removeImage();
+                }).show();
+    }
+
+    private void openGallery() {
+        galleryLauncher.launch(
+                new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+        );
+    }
+
+    private void requestCamera() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
+                == PackageManager.PERMISSION_GRANTED) {
+            openCamera();
+        } else {
+            cameraPermissionLauncher.launch(Manifest.permission.CAMERA);
+        }
+    }
+
+    private void openCamera() {
+        cameraLauncher.launch(new Intent(MediaStore.ACTION_IMAGE_CAPTURE));
+    }
+
+    private void removeImage() {
+        selectedImagePath = null;
+        ivProfile.setImageResource(R.drawable.image_24);
+    }
+
+    private void initLaunchers() {
+
+        cameraLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                r -> {
+                    if (r.getResultCode() == RESULT_OK && r.getData() != null) {
+                        Bitmap bmp = (Bitmap) Objects.requireNonNull(r.getData().getExtras()).get("data");
+                        ivProfile.setImageBitmap(bmp);
+                        selectedImagePath = bitmapToUri(bmp).toString();
+                    }
+                }
+        );
+
+        galleryLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                r -> {
+                    if (r.getResultCode() == RESULT_OK && r.getData() != null) {
+                        Uri uri = r.getData().getData();
+                        selectedImagePath = uri.toString();
+                        ivProfile.setImageURI(uri);
+                    }
+                }
+        );
+
+        cameraPermissionLauncher = registerForActivityResult(
+                new ActivityResultContracts.RequestPermission(),
+                granted -> {
+                    if (granted) openCamera();
+                    else Toast.makeText(this, "Camera permission denied", Toast.LENGTH_SHORT).show();
+                }
+        );
+    }
+
+    private Uri bitmapToUri(Bitmap bitmap) {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 90, bytes);
+
+        String path = MediaStore.Images.Media.insertImage(
+                getContentResolver(),
+                bitmap,
+                "emp_" + System.currentTimeMillis(),
+                null
+        );
+        return Uri.parse(path);
+    }
+
+
+    private void checkStoragePermission() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES)
+                    != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{Manifest.permission.READ_MEDIA_IMAGES}, 101);
+            }
+        } else {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
+                    != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 101);
+            }
+        }
+    }
+
 
 
 }

@@ -11,16 +11,31 @@ public class Employee {
     private long joiningDate; // timestamp (milliseconds)
     private String department;
     private String skills; // comma separated skills
-    private String profileImagePath;
+    private String imagePath;
 
-    // 🔹 Empty constructor (required)
     public Employee() {
     }
 
     // 🔹 Constructor without id (for insert)
-    public Employee(String name, String email, String phone, int age, double salary,
-                    String active, long joiningDate, String department,
-                    String skills) {
+    public Employee(
+            String name, String email, String phone, int age, double salary,
+            String active, long joiningDate, String department, String skills,
+            String imagePath) {
+        this.name = name;
+        this.email = email;
+        this.phone = phone;
+        this.age = age;
+        this.salary = salary;
+        this.active = active;
+        this.joiningDate = joiningDate;
+        this.department = department;
+        this.skills = skills;
+        this.imagePath = imagePath;
+    }
+
+    public Employee(String name, String email, String phone, int age,
+                    double salary, String active, long joiningDate,
+                    String department, String skills) {
         this.name = name;
         this.email = email;
         this.phone = phone;
@@ -114,6 +129,14 @@ public class Employee {
         this.skills = skills;
     }
 
+    public String getImagePath() {
+        return imagePath;
+    }
+
+    public void setImagePath(String imagePath) {
+        this.imagePath = imagePath;
+    }
+
     @Override
     public String toString() {
         return "Employee{" +
@@ -123,10 +146,11 @@ public class Employee {
                 ", phone='" + phone + '\'' +
                 ", age=" + age +
                 ", salary=" + salary +
-                ", active=" + active +
+                ", active='" + active + '\'' +
                 ", joiningDate=" + joiningDate +
                 ", department='" + department + '\'' +
                 ", skills='" + skills + '\'' +
+                ", imagePath='" + imagePath + '\'' +
                 '}';
     }
 }
